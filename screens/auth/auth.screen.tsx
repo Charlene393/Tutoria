@@ -1,11 +1,13 @@
  
 import { ForgotPassword } from '@/components/auth/forgotpassword';
 import { AuthInput } from '@/components/auth/input';
-import { windowWidth } from '@/themes/app.constant';
+import { windowHeight, windowWidth } from '@/themes/app.constant';
 import { FontAwesome } from '@expo/vector-icons';
+import { BlurView } from 'expo-blur';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Modal, Pressable, Text, View } from 'react-native';
+import SignUpScreen from './signup.screen';
 
  
 export default function SignInScreen() {
@@ -50,8 +52,13 @@ export default function SignInScreen() {
     if (!valid) return;
     // Proceed with login logic here
   }
+  const [signUpModalVisible, setSignUpModalVisible] = React.useState(false);
+  function SignUpHandle() {
+    setSignUpModalVisible(true);
+  }
 
   return (
+    <>
     <View style={{ alignItems: 'center', marginTop: 32 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center' , marginBottom:12}}>
         <FontAwesome
@@ -139,11 +146,37 @@ export default function SignInScreen() {
           Don&apos;t have an account?{' '}
           <Text
             style={{ color: '#000080', fontWeight: 'bold' }}
+            onPress={SignUpHandle}
           >
             Sign Up
           </Text>
         </Text>
       </Pressable>
     </View>
-  )
+    <Modal
+      animationType="fade"
+      transparent={true}
+      visible={signUpModalVisible}
+      onRequestClose={() => setSignUpModalVisible(false)}
+    >
+      <Pressable style={{ flex: 1 }} onPress={() => setSignUpModalVisible(false)}>
+        <BlurView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <Pressable
+            style={{
+              width: windowWidth(420),
+                height: windowHeight (520),
+                marginHorizontal: windowWidth(50),
+                backgroundColor: "#fff",
+                borderRadius:30,
+                alignItems:"center",
+                justifyContent:"center",
+            }}
+            onPress={e => e.stopPropagation()}>
+            <SignUpScreen />
+          </Pressable>
+        </BlurView>
+      </Pressable>
+    </Modal>
+    </>
+  );
 }
