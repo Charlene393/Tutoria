@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 
 import { ThemeProvider } from "@/context/theme.context";
 import {
@@ -11,31 +10,11 @@ import {
 } from "@expo-google-fonts/poppins";
 import { Stack } from "expo-router";
 import React from "react";
-=======
-import { ThemeProvider } from "@/context/theme.context";
-import {
-  Poppins_300Light,
-  Poppins_400Regular,
-  Poppins_500Medium,
-  Poppins_600SemiBold,
-  Poppins_700Bold,
-  useFonts,
-} from "@expo-google-fonts/poppins";
-import { Stack } from "expo-router";
-import { LogBox } from "react-native";
->>>>>>> f2e765d077a90e2afb2d87024ec5cdcb6749738b
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 // SplashScreen.preventAutoHideAsync();
 
-<<<<<<< HEAD
-
 export default function RootLayout() {
-=======
-LogBox.ignoreAllLogs();
-
-function RootLayout() {
->>>>>>> f2e765d077a90e2afb2d87024ec5cdcb6749738b
   const [loaded] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
     Poppins_600SemiBold,
@@ -54,7 +33,3 @@ function RootLayout() {
     </ThemeProvider>
   );
 }
-<<<<<<< HEAD
-=======
-export default RootLayout;
->>>>>>> f2e765d077a90e2afb2d87024ec5cdcb6749738b

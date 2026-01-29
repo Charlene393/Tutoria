@@ -1,12 +1,6 @@
-<<<<<<< HEAD
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useColorScheme } from "react-native";
-=======
-import React, { createContext, useState, useContext, useEffect } from "react";
-import { Appearance, useColorScheme } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
->>>>>>> f2e765d077a90e2afb2d87024ec5cdcb6749738b
 
 // Define your custom themes
 const LightTheme = {
@@ -59,8 +53,4 @@ export const ThemeProvider = ({ children }:any) => {
   );
 };
 
-<<<<<<< HEAD
 export const useTheme = () => useContext(ThemeContext);
-=======
-export const useTheme = () => useContext(ThemeContext);
->>>>>>> f2e765d077a90e2afb2d87024ec5cdcb6749738b
