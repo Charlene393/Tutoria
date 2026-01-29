@@ -3,11 +3,13 @@ import { ForgotPassword } from '@/components/auth/forgotpassword';
 import { AuthInput } from '@/components/auth/input';
 import { windowWidth } from '@/themes/app.constant';
 import { FontAwesome } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import React from 'react';
-import { Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
  
 export default function SignInScreen() {
+  const router = useRouter();
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [emailError, setEmailError] = React.useState("");
@@ -132,15 +134,16 @@ export default function SignInScreen() {
       >
         Log In
       </Text>
-      <Text
-    style={{
-        marginTop: 16,
-        fontSize: 14,
-        color: '#000080',
-    }}
-  >
-        Don't have an account? Sign Up
-      </Text>
+      <Pressable style={{ marginTop: 16 }}>
+        <Text style={{ color: '#555' }}>
+          Don&apos;t have an account?{' '}
+          <Text
+            style={{ color: '#000080', fontWeight: 'bold' }}
+          >
+            Sign Up
+          </Text>
+        </Text>
+      </Pressable>
     </View>
   )
 }

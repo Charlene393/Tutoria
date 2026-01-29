@@ -1,5 +1,5 @@
 import { HEIGHT, WIDTH } from "@/configs/constants";
-import SignInScreen from "@/screens/auth/signin.screen";
+import SignInScreen from "@/screens/auth/auth.screen";
 import {
   fontSizes,
   SCREEN_WIDTH,
