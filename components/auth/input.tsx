@@ -25,6 +25,7 @@ export function AuthInput({ value, onChangeText, placeholder, secureTextEntry = 
 					autoCapitalize={isPassword ? 'none' : 'sentences'}
 					secureTextEntry={isPassword && !isPasswordVisible}
 					keyboardType={placeholder.toLowerCase().includes('email') ? 'email-address' : 'default'}
+					underlineColorAndroid="transparent"
 				/>
 				{isPassword && (
 					<TouchableOpacity onPress={() => setIsPasswordVisible(v => !v)}>
@@ -61,7 +62,6 @@ const styles = StyleSheet.create({
 			},
 			input: {
 				flex: 1,
-				width: '100%',
 				height: 56,
 				fontSize: 18,
 				color: '#222',
