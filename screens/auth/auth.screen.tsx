@@ -4,14 +4,22 @@ import { AuthInput } from '@/components/auth/input';
 import { windowHeight, windowWidth } from '@/themes/app.constant';
 import { FontAwesome } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
-import { useRouter } from 'expo-router';
 import React from 'react';
 import { Modal, Pressable, Text, View } from 'react-native';
+import * as Yup from 'yup';
 import SignUpScreen from './signup.screen';
 
+const validationSchema = Yup.object().shape({
+  email: Yup.string().required('Email is required').email('Please enter a valid email address').label ("Email"),
+  password: Yup.string().required('Password is required').min(8, 'Password must be at least 8 characters')
+    .matches(/[A-Z]/, 'Password must contain at least one uppercase letter')
+    .matches(/[a-z]/, 'Password must contain at least one lowercase letter')
+    .matches(/\d/, 'Password must contain at least one number')
+    .matches(/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/, 'Password must contain at least one special character')
+    .label("Password"),
+})
  
 export default function SignInScreen() {
-  const router = useRouter();
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [emailError, setEmailError] = React.useState("");
@@ -30,7 +38,6 @@ export default function SignInScreen() {
       setEmailError("");
     }
   }
-
   function isStrongPassword(pw: string) {
     // At least 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special char
     return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/.test(pw);
@@ -52,6 +59,8 @@ export default function SignInScreen() {
     if (!valid) return;
     // Proceed with login logic here
   }
+
+  
   const [signUpModalVisible, setSignUpModalVisible] = React.useState(false);
   function SignUpHandle() {
     setSignUpModalVisible(true);

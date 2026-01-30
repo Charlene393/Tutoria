@@ -15,7 +15,8 @@ export default function SignUpScreen() {
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
   const [signUpAttempted, setSignUpAttempted] = useState(false);
 
-  function isValidEmail(email: string) {
+ 
+function isValidEmail(email: string) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   }
 
