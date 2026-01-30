@@ -3,10 +3,13 @@ import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-nativ
 
 type InputProps = {
 	value: string;
-	onChangeText: (text: string) => void;
+	onChangeText?: (text: string) => void;
 	placeholder: string;
+	onBlur?: (text: string) => void;
+	keyboardType?: 'default' | 'email-address' | 'numeric' | 'phone-pad';
 	secureTextEntry?: boolean;
 	label?: string;
+	autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
 };
 
 export function AuthInput({ value, onChangeText, placeholder, secureTextEntry = false, label }: InputProps) {

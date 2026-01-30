@@ -1,144 +1,104 @@
-import { AuthInput } from '@/components/auth/input';
-import { windowWidth } from '@/themes/app.constant';
-import { FontAwesome } from '@expo/vector-icons';
-import React, { useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
-
-export default function SignUpScreen() {
-  const [role, setRole] = useState<string | null>(null);
-  const [roleError, setRoleError] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [emailError, setEmailError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
-  const [confirmPasswordError, setConfirmPasswordError] = useState("");
-  const [signUpAttempted, setSignUpAttempted] = useState(false);
-
  
-function isValidEmail(email: string) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  }
+import { AuthInput } from '@/components/auth/input';
+import { windowHeight, windowWidth } from '@/themes/app.constant';
+import { FontAwesome } from '@expo/vector-icons';
+import { BlurView } from 'expo-blur';
+import { Formik } from 'formik';
+import React from 'react';
+import { Modal, Pressable, Text, View } from 'react-native';
+import * as Yup from 'yup';
 
-  function isStrongPassword(pw: string) {
-    return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/.test(pw);
-  }
-
-  function handleSignUp() {
-    setSignUpAttempted(true);
-    let valid = true;
-    if (!isValidEmail(email)) {
-      setEmailError("Please enter a valid email address");
-      valid = false;
-    } else {
-      setEmailError("");
-    }
-    if (!isStrongPassword(password)) {
-      setPasswordError("Password must be at least 8 characters, include uppercase, lowercase, number, and special character.");
-      valid = false;
-    } else {
-      setPasswordError("");
-    }
-    if (password !== confirmPassword) {
-      setConfirmPasswordError("Passwords do not match");
-      valid = false;
-    } else {
-      setConfirmPasswordError("");
-    }
-    if (!role) {
-      setRoleError("Please select a role");
-      valid = false;
-    } else {
-      setRoleError("");
-    }
-    if (!valid) return;
-    // Proceed with sign up logic here
-  }
+const validationSchema = Yup.object().shape({
+  email: Yup.string().required('Email is required').email('Please enter a valid email address').label ("Email"),
+  password: Yup.string().required('Password is required').min(8, 'Password must be at least 8 characters')
+    .matches(/[A-Z]/, 'Password must contain at least one uppercase letter')
+    .matches(/[a-z]/, 'Password must contain at least one lowercase letter')
+    .matches(/\d/, 'Password must contain at least one number')
+    .matches(/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/, 'Password must contain at least one special character')
+    .label("Password"),
+  confirmpassword: Yup.string()
+    .oneOf([Yup.ref('password'), undefined], 'Passwords must match')
+    .required('Confirm Password is required')
+    .label('Confirm Password'),
+    
+})
+export default function SignUpScreen() {
+  const [signUpModalVisible, setSignUpModalVisible] = React.useState(false);
 
   return (
-    <View style={{ alignItems: 'center', marginTop: 2 }}>
-         <View style={{ flexDirection: 'row', alignItems: 'center' , marginBottom:20}}>
+    <View style = {{ alignItems: 'center', marginTop: 32 }}>
+      <Formik
+      initialValues={{email: "", password:"", confirmpassword: ""}}
+      onSubmit={(values) => {
+        console.log(values);
+      }}
+      validationSchema={validationSchema}
+      >
+        {({handleChange, handleBlur, handleSubmit, errors, setFieldTouched, touched, values}) => (
+          <>
+           <View style={{ flexDirection: 'row', alignItems: 'center' , marginBottom:12}}>
         <FontAwesome
-            name="graduation-cap"
-            size={40}
-            color="#000080"
+          name="graduation-cap"
+          size={40}
+          color="#000080"
         />
         <Text style={{
-            fontSize: 26,
-            fontWeight: 'bold',
-            marginLeft: 12,
-            color: '#222',
+          fontSize: 26,
+          fontWeight: 'bold',
+          marginLeft: 12,
+          color: '#222',
         }}>
-            Tutoria
+          Tutoria
         </Text>
-        </View>
-        <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#222', marginBottom: 19 }}>Create an Account</Text>
-        <View style={{ marginBottom: 16, alignItems: 'center' }}>
-          <View style={{ flexDirection: 'row', gap: 16 }}>
-            <Pressable
-              onPress={() => setRole('Tutor')}
-              style={{
-                backgroundColor: role === 'Tutor' ? '#000080' : '#fff',
-                borderColor: '#000080',
-                borderWidth: 1,
-                borderRadius: 8,
-                paddingVertical: 10,
-                paddingHorizontal: 24,
-                marginRight: 8,
-              }}
-            >
-              <Text style={{ color: role === 'Tutor' ? '#fff' : '#000080', fontWeight: 'bold' }}>Tutor</Text>
-            </Pressable>
-            <Pressable
-              onPress={() => setRole('Student')}
-              style={{
-                backgroundColor: role === 'Student' ? '#000080' : '#fff',
-                borderColor: '#000080',
-                borderWidth: 1,
-                borderRadius: 8,
-                paddingVertical: 10,
-                paddingHorizontal: 24,
-              }}
-            >
-              <Text style={{ color: role === 'Student' ? '#fff' : '#000080', fontWeight: 'bold' }}>Student</Text>
-            </Pressable>
-          </View>
-          {roleError && (
-            <Text style={{ color: 'red', marginTop: 6 }}>{roleError}</Text>
-          )}
-        </View>
-      
-      <AuthInput
-        value={email}
-        onChangeText={setEmail}
-        placeholder="you@example.com"
-        label="Email address"
-      />
-      {emailError && (signUpAttempted || email.length > 0) && (
-        <Text style={{ color: 'red', marginBottom: 8, alignSelf: 'flex-start', paddingLeft: 8 }}>{emailError}</Text>
-      )}
-      <AuthInput
-        value={password}
-        onChangeText={setPassword}
-        placeholder="Password"
-        secureTextEntry
-        label="Password"
-      />
-      {passwordError && (signUpAttempted || password.length > 0) && (
-        <Text style={{ color: 'red', marginBottom: 8, alignSelf: 'flex-start', paddingLeft: 8 }}>{passwordError}</Text>
-      )}
-      <AuthInput
-        value={confirmPassword}
-        onChangeText={setConfirmPassword}
-        placeholder="Confirm Password"
-        secureTextEntry
-        label="Confirm Password"
-      />
-      {confirmPasswordError && (signUpAttempted || confirmPassword.length > 0) && (
-        <Text style={{ color: 'red', marginBottom: 8, alignSelf: 'flex-start', paddingLeft: 8 }}>{confirmPasswordError}</Text>
-      )}
-      <Text
-        onPress={handleSignUp}
+      </View>
+      <Text style={{
+            fontSize: 16,
+            textAlign: 'center',
+            marginTop: 19,
+            color: '#555',
+            marginBottom: 24,
+        }}>
+            Sign in to your account to continue
+        </Text>
+        <AuthInput
+          value={values.email}
+          onChangeText={handleChange('email')}
+          placeholder="you@example.com"
+          label="Email address"
+          onBlur = {handleBlur ("email")}
+          keyboardType="email-address"
+        />
+        {/* Error */}
+        {touched.email && errors.email && <Text style={{ color: 'red' }}>{errors.email}</Text>}
+        
+        <AuthInput
+          value={values.password}
+          onChangeText={handleChange('password')}
+          placeholder="password"
+          label="Password"
+          onBlur = {handleBlur ("password")}
+          keyboardType="default"
+          secureTextEntry={true}
+        />
+        {/* Error */}
+        {touched.password && errors.password && <Text style={{ color: 'red' }}>{errors.password}</Text>}
+
+        <AuthInput
+          value={values.confirmpassword}
+          onChangeText={handleChange('confirmpassword')}
+          placeholder="Confirm Password"
+          label="Confirm Password"
+          onBlur = {handleBlur ("confirmpassword")}
+          keyboardType="default"
+          secureTextEntry={true}
+        />
+        {/* Error */}
+        {touched.confirmpassword && errors.confirmpassword && <Text style={{ color: 'red' }}>{errors.confirmpassword}</Text>}
+
+
+        {/*Login*/}
+        <Text
+        onPress={handleSubmit}
         style={{
           backgroundColor: '#000080',
           color: '#fff',
@@ -151,8 +111,56 @@ function isValidEmail(email: string) {
           fontSize: 16,
         }}
       >
-        Create Account
+        Log In
       </Text>
+      <Pressable style={{ marginTop: 16 }}>
+        <Text style={{ color: '#555' }}>
+          Don&apos;t have an account?{' '}
+          <Text
+            style={{ color: '#000080', fontWeight: 'bold' }}
+            onPress={() => setSignUpModalVisible(true)}
+          >
+            Sign Up
+          </Text>
+        </Text>
+      </Pressable>
+      <Modal
+      animationType="fade"
+      transparent={true}
+      visible={signUpModalVisible}
+      onRequestClose={() => setSignUpModalVisible(false)}
+    >
+      <Pressable style={{ flex: 1 }} onPress={() => setSignUpModalVisible(false)}>
+        <BlurView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <Pressable
+            style={{
+              width: windowWidth(420),
+                height: windowHeight (520),
+                marginHorizontal: windowWidth(50),
+                backgroundColor: "#fff",
+                borderRadius:30,
+                alignItems:"center",
+                justifyContent:"center",
+            }}
+            onPress={e => e.stopPropagation()}>
+            <SignUpScreen />
+          </Pressable>
+        </BlurView>
+      </Pressable>
+    </Modal>
+      </>
+      
+        )}
+      
+        
+      </Formik>
+
     </View>
-  );
+  )
+
 }
+  
+  
+
+  
+  

@@ -1,11 +1,11 @@
  
-import { ForgotPassword } from '@/components/auth/forgotpassword';
 import { AuthInput } from '@/components/auth/input';
 import { windowHeight, windowWidth } from '@/themes/app.constant';
 import { FontAwesome } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
+import { Formik } from 'formik';
 import React from 'react';
-import { Modal, Pressable, Text, View } from 'react-native';
+import { Modal, Pressable, Text, TouchableOpacity, View } from 'react-native';
 import * as Yup from 'yup';
 import SignUpScreen from './signup.screen';
 
@@ -18,58 +18,21 @@ const validationSchema = Yup.object().shape({
     .matches(/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/, 'Password must contain at least one special character')
     .label("Password"),
 })
- 
 export default function SignInScreen() {
-  const [email, setEmail] = React.useState("");
-  const [password, setPassword] = React.useState("");
-  const [emailError, setEmailError] = React.useState("");
-  const [passwordError, setPasswordError] = React.useState("");
-  const [loginAttempted, setLoginAttempted] = React.useState(false);
-
-  function isValidEmail(email: string) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  }
-
-  function setupEmail(newEmail: string) {
-    setEmail(newEmail);
-    if (!isValidEmail(newEmail)) {
-      setEmailError("Please enter a valid email address");
-    } else {
-      setEmailError("");
-    }
-  }
-  function isStrongPassword(pw: string) {
-    // At least 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special char
-    return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/.test(pw);
-  }
-
-  function handleLogin() {
-    setLoginAttempted(true);
-    let valid = true;
-    if (!isValidEmail(email)) {
-      setEmailError("Please enter a valid email address");
-      valid = false;
-    }
-    if (!isStrongPassword(password)) {
-      setPasswordError("Password must be at least 8 characters, include uppercase, lowercase, number, and special character.");
-      valid = false;
-    } else {
-      setPasswordError("");
-    }
-    if (!valid) return;
-    // Proceed with login logic here
-  }
-
-  
   const [signUpModalVisible, setSignUpModalVisible] = React.useState(false);
-  function SignUpHandle() {
-    setSignUpModalVisible(true);
-  }
 
   return (
-    <>
-    <View style={{ alignItems: 'center', marginTop: 32 }}>
-      <View style={{ flexDirection: 'row', alignItems: 'center' , marginBottom:12}}>
+    <View style = {{ alignItems: 'center', marginTop: 32 }}>
+      <Formik
+      initialValues={{email: "", password:""}}
+      onSubmit={(values) => {
+        console.log(values);
+      }}
+      validationSchema={validationSchema}
+      >
+        {({handleChange, handleBlur, handleSubmit, errors, setFieldTouched, touched, values}) => (
+          <>
+           <View style={{ flexDirection: 'row', alignItems: 'center' , marginBottom:12}}>
         <FontAwesome
           name="graduation-cap"
           size={40}
@@ -84,8 +47,7 @@ export default function SignInScreen() {
           Tutoria
         </Text>
       </View>
-      
-        <Text style={{
+      <Text style={{
             fontSize: 16,
             textAlign: 'center',
             marginTop: 19,
@@ -95,47 +57,33 @@ export default function SignInScreen() {
             Sign in to your account to continue
         </Text>
         <AuthInput
-          value={email}
-          onChangeText={setupEmail}
+          value={values.email}
+          onChangeText={handleChange('email')}
           placeholder="you@example.com"
           label="Email address"
+          onBlur = {handleBlur ("email")}
+          keyboardType="email-address"
+          autoCapitalize="none"
         />
-        {emailError && (loginAttempted || email.length > 0) && (
-          <Text style={{
-            color: 'red',
-            marginBottom: 8,
-            alignSelf: 'flex-start',
-            paddingLeft: 8,
-          }}>{emailError}</Text>
-        )}
-        <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%', marginBottom: 4, paddingHorizontal: 24}}>
-          <Text style={{
-            fontSize: 16,
-            fontWeight: '500',
-            color: '#222',
-          }}>
-            Password
-          </Text>
-          <View style={{ flex: 1 }} />
-          <ForgotPassword onPress={() => {}} />
-        </View>
-        <AuthInput
-          value={password}
-          onChangeText={setPassword}
-          placeholder="Password"
-          secureTextEntry
-        />
-        {passwordError && (loginAttempted || password.length > 0) && (
-          <Text style={{
-            color: 'red',
-            marginBottom: 8,
-            alignSelf: 'flex-start',
-            paddingLeft: 8,
-          }}>{passwordError}</Text>
-        )}
+        {/* Error */}
+        {touched.email && errors.email && <Text style={{ color: 'red' }}>{errors.email}</Text>}
         
-      <Text
-        onPress={handleLogin}
+        <AuthInput
+          value={values.password}
+          onChangeText={handleChange('password')}
+          placeholder="password"
+          label="Password"
+          onBlur = {handleBlur ("password")}
+          keyboardType="default"
+          secureTextEntry={true}
+        />
+        {/* Error */}
+        {touched.password && errors.password && <Text style={{ color: 'red' }}>{errors.password}</Text>}
+
+        {/*Login*/}
+        <TouchableOpacity 
+        onPress={handleSubmit}>
+        <Text
         style={{
           backgroundColor: '#000080',
           color: '#fff',
@@ -148,21 +96,21 @@ export default function SignInScreen() {
           fontSize: 16,
         }}
       >
-        Log In
+        Sign In
       </Text>
+      </TouchableOpacity>
       <Pressable style={{ marginTop: 16 }}>
         <Text style={{ color: '#555' }}>
           Don&apos;t have an account?{' '}
           <Text
             style={{ color: '#000080', fontWeight: 'bold' }}
-            onPress={SignUpHandle}
+            onPress={() => setSignUpModalVisible(true)}
           >
             Sign Up
           </Text>
         </Text>
       </Pressable>
-    </View>
-    <Modal
+      <Modal
       animationType="fade"
       transparent={true}
       visible={signUpModalVisible}
@@ -186,6 +134,19 @@ export default function SignInScreen() {
         </BlurView>
       </Pressable>
     </Modal>
-    </>
-  );
+      </>
+      
+        )}
+      
+        
+      </Formik>
+
+    </View>
+  )
+
 }
+  
+  
+
+  
+  
