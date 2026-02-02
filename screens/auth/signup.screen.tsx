@@ -1,11 +1,12 @@
  
 import { AuthInput } from '@/components/auth/input';
-import { windowHeight, windowWidth } from '@/themes/app.constant';
+import { windowWidth } from '@/themes/app.constant';
 import { FontAwesome } from '@expo/vector-icons';
-import { BlurView } from 'expo-blur';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter } from 'expo-router';
 import { Formik } from 'formik';
-import React from 'react';
-import { Modal, Pressable, Text, View } from 'react-native';
+import React, { useState } from 'react';
+import { Text, View } from 'react-native';
 import * as Yup from 'yup';
 
 const validationSchema = Yup.object().shape({
@@ -22,17 +23,33 @@ const validationSchema = Yup.object().shape({
     .label('Confirm Password'),
     
 })
-export default function SignUpScreen() {
-  const [signUpModalVisible, setSignUpModalVisible] = React.useState(false);
+type SignUpScreenProps = {
+  onSuccess?: () => void;
+};
+
+export default function SignUpScreen({ onSuccess }: SignUpScreenProps) {
+  const [error, setError] = useState<string | null>(null);
+
 
   return (
     <View style = {{ alignItems: 'center', marginTop: 32 }}>
       <Formik
-      initialValues={{email: "", password:"", confirmpassword: ""}}
-      onSubmit={(values) => {
-        console.log(values);
-      }}
-      validationSchema={validationSchema}
+        initialValues={{email: "", password:"", confirmpassword: ""}}
+        onSubmit={async (values) => {
+          // Check if user already exists in AsyncStorage
+          const usersRaw = await AsyncStorage.getItem('users');
+          const users = usersRaw ? JSON.parse(usersRaw) : [];
+          const exists = users.some((u: any) => u.email === values.email);
+          if (exists) {
+            setError('An account with this email already exists.');
+            return;
+          }
+          users.push({ email: values.email, password: values.password });
+          await AsyncStorage.setItem('users', JSON.stringify(users));
+          setError(null);
+          if (onSuccess) onSuccess();
+        }}
+        validationSchema={validationSchema}
       >
         {({handleChange, handleBlur, handleSubmit, errors, setFieldTouched, touched, values}) => (
           <>
@@ -68,8 +85,9 @@ export default function SignUpScreen() {
           onBlur = {handleBlur ("email")}
           keyboardType="email-address"
         />
-        {/* Error */}
-        {touched.email && errors.email && <Text style={{ color: 'red' }}>{errors.email}</Text>}
+  {/* Error */}
+  {touched.email && errors.email && <Text style={{ color: 'red' }}>{errors.email}</Text>}
+  {error && <Text style={{ color: 'red', marginTop: 8 }}>{error}</Text>}
         
         <AuthInput
           value={values.password}
@@ -98,62 +116,27 @@ export default function SignUpScreen() {
 
         {/*Login*/}
         <Text
-        onPress={handleSubmit}
-        style={{
-          backgroundColor: '#000080',
-          color: '#fff',
-          paddingVertical: 12,
-          width: windowWidth(350),
-          borderRadius: 8,
-          textAlign: 'center',
-          marginTop: 24,
-          fontWeight: 'bold',
-          fontSize: 16,
-        }}
-      >
-        Log In
-      </Text>
-      <Pressable style={{ marginTop: 16 }}>
-        <Text style={{ color: '#555' }}>
-          Don&apos;t have an account?{' '}
-          <Text
-            style={{ color: '#000080', fontWeight: 'bold' }}
-            onPress={() => setSignUpModalVisible(true)}
-          >
-            Sign Up
-          </Text>
+          onPress={() => handleSubmit()}
+          style={{
+            backgroundColor: '#000080',
+            color: '#fff',
+            paddingVertical: 12,
+            width: windowWidth(350),
+            borderRadius: 8,
+            textAlign: 'center',
+            marginTop: 24,
+            fontWeight: 'bold',
+            fontSize: 16,
+          }}
+        >
+          Sign Up
         </Text>
-      </Pressable>
-      <Modal
-      animationType="fade"
-      transparent={true}
-      visible={signUpModalVisible}
-      onRequestClose={() => setSignUpModalVisible(false)}
-    >
-      <Pressable style={{ flex: 1 }} onPress={() => setSignUpModalVisible(false)}>
-        <BlurView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <Pressable
-            style={{
-              width: windowWidth(420),
-                height: windowHeight (520),
-                marginHorizontal: windowWidth(50),
-                backgroundColor: "#fff",
-                borderRadius:30,
-                alignItems:"center",
-                justifyContent:"center",
-            }}
-            onPress={e => e.stopPropagation()}>
-            <SignUpScreen />
-          </Pressable>
-        </BlurView>
-      </Pressable>
-    </Modal>
       </>
       
         )}
       
         
-      </Formik>
+  </Formik>
 
     </View>
   )

@@ -3,10 +3,12 @@ import { AuthInput } from '@/components/auth/input';
 import { windowHeight, windowWidth } from '@/themes/app.constant';
 import { FontAwesome } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
+import { useRouter } from 'expo-router';
 import { Formik } from 'formik';
 import React from 'react';
 import { Modal, Pressable, Text, TouchableOpacity, View } from 'react-native';
 import * as Yup from 'yup';
+import { useAuth } from '../../context/auth.context';
 import SignUpScreen from './signup.screen';
 
 const validationSchema = Yup.object().shape({
@@ -20,15 +22,18 @@ const validationSchema = Yup.object().shape({
 })
 export default function SignInScreen() {
   const [signUpModalVisible, setSignUpModalVisible] = React.useState(false);
+  const { login, loading } = useAuth();
+  const [error, setError] = React.useState<string | null>(null);
+  const router = useRouter();
 
   return (
     <View style = {{ alignItems: 'center', marginTop: 32 }}>
       <Formik
-      initialValues={{email: "", password:""}}
-      onSubmit={(values) => {
-        console.log(values);
-      }}
-      validationSchema={validationSchema}
+        initialValues={{email: "cha@gmai.com", password:"Abcd_1234"}}
+        onSubmit={ (values) => {
+          router.push("/(routes)/home")
+        }}
+        validationSchema={validationSchema}
       >
         {({handleChange, handleBlur, handleSubmit, errors, setFieldTouched, touched, values}) => (
           <>
@@ -81,24 +86,25 @@ export default function SignInScreen() {
         {touched.password && errors.password && <Text style={{ color: 'red' }}>{errors.password}</Text>}
 
         {/*Login*/}
-        <TouchableOpacity 
-        onPress={handleSubmit}>
-        <Text
-        style={{
-          backgroundColor: '#000080',
-          color: '#fff',
-          paddingVertical: 12,
-          width: windowWidth(350),
-          borderRadius: 8,
-          textAlign: 'center',
-          marginTop: 24,
-          fontWeight: 'bold',
-          fontSize: 16,
-        }}
-      >
-        Sign In
-      </Text>
-      </TouchableOpacity>
+  <TouchableOpacity onPress={() => handleSubmit()} disabled={loading}>
+          <Text
+            style={{
+              backgroundColor: '#000080',
+              color: '#fff',
+              paddingVertical: 12,
+              width: windowWidth(350),
+              borderRadius: 8,
+              textAlign: 'center',
+              marginTop: 24,
+              fontWeight: 'bold',
+              fontSize: 16,
+              opacity: loading ? 0.7 : 1,
+            }}
+          >
+            {loading ? 'Signing In...' : 'Sign In'}
+          </Text>
+        </TouchableOpacity>
+        {error && <Text style={{ color: 'red', marginTop: 8 }}>{error}</Text>}
       <Pressable style={{ marginTop: 16 }}>
         <Text style={{ color: '#555' }}>
           Don&apos;t have an account?{' '}
@@ -111,29 +117,29 @@ export default function SignInScreen() {
         </Text>
       </Pressable>
       <Modal
-      animationType="fade"
-      transparent={true}
-      visible={signUpModalVisible}
-      onRequestClose={() => setSignUpModalVisible(false)}
-    >
-      <Pressable style={{ flex: 1 }} onPress={() => setSignUpModalVisible(false)}>
-        <BlurView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <Pressable
-            style={{
-              width: windowWidth(420),
-                height: windowHeight (520),
+        animationType="fade"
+        transparent={true}
+        visible={signUpModalVisible}
+        onRequestClose={() => setSignUpModalVisible(false)}
+      >
+        <Pressable style={{ flex: 1 }} onPress={() => setSignUpModalVisible(false)}>
+          <BlurView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <Pressable
+              style={{
+                width: windowWidth(420),
+                height: windowHeight(520),
                 marginHorizontal: windowWidth(50),
                 backgroundColor: "#fff",
-                borderRadius:30,
-                alignItems:"center",
-                justifyContent:"center",
-            }}
-            onPress={e => e.stopPropagation()}>
-            <SignUpScreen />
-          </Pressable>
-        </BlurView>
-      </Pressable>
-    </Modal>
+                borderRadius: 30,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+              onPress={e => e.stopPropagation()}>
+              <SignUpScreen onSuccess={() => setSignUpModalVisible(false)} />
+            </Pressable>
+          </BlurView>
+        </Pressable>
+      </Modal>
       </>
       
         )}

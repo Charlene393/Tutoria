@@ -10,13 +10,13 @@ import {
 } from "@expo-google-fonts/poppins";
 import { Stack } from "expo-router";
 import React from "react";
+import { AuthProvider } from "../context/auth.context";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 // SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const [loaded] = useFonts({
-    SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
+  useFonts({
     Poppins_600SemiBold,
     Poppins_300Light,
     Poppins_700Bold,
@@ -25,11 +25,14 @@ export default function RootLayout() {
   });
 
   return (
-    <ThemeProvider>
+    <AuthProvider>
+      <ThemeProvider>
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="index" />
           <Stack.Screen name="(routes)/onboarding/index" />
+          <Stack.Screen name="(tabs)/home/index" />
         </Stack>
-    </ThemeProvider>
+      </ThemeProvider>
+    </AuthProvider>
   );
 }
