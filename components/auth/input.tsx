@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
 		fontSize: 18,
 		color: '#222',
 		paddingVertical: 10,
-		backgroundColor: '#fff', // Ensure input background is white
+		backgroundColor: 'transparent', // Ensure no yellow highlight
 	},
 	toggle: {
 		color: '#000080',

@@ -1,12 +1,10 @@
- 
 import { AuthInput } from '@/components/auth/input';
 import { windowWidth } from '@/themes/app.constant';
 import { FontAwesome } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { Formik } from 'formik';
 import React, { useState } from 'react';
-import { Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import * as Yup from 'yup';
 
 const validationSchema = Yup.object().shape({
@@ -29,25 +27,46 @@ type SignUpScreenProps = {
 
 export default function SignUpScreen({ onSuccess }: SignUpScreenProps) {
   const [error, setError] = useState<string | null>(null);
-
+  const [role, setRole] = useState<string | null>(null);
+  const [roleError, setRoleError] = useState<string | null>(null);
+  const router = useRouter();
 
   return (
     <View style = {{ alignItems: 'center', marginTop: 32 }}>
       <Formik
         initialValues={{email: "", password:"", confirmpassword: ""}}
         onSubmit={async (values) => {
-          // Check if user already exists in AsyncStorage
-          const usersRaw = await AsyncStorage.getItem('users');
-          const users = usersRaw ? JSON.parse(usersRaw) : [];
-          const exists = users.some((u: any) => u.email === values.email);
-          if (exists) {
-            setError('An account with this email already exists.');
+          if (!role) {
+            setRoleError('Please select a role.');
             return;
           }
-          users.push({ email: values.email, password: values.password });
-          await AsyncStorage.setItem('users', JSON.stringify(users));
-          setError(null);
-          if (onSuccess) onSuccess();
+
+          try {
+            const response = await fetch(`http://localhost:4000/signup`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                email: values.email,
+                password: values.password,
+                confirmPassword: values.confirmpassword, // Include confirmPassword
+                role, // Include role
+              }),
+            });
+
+            console.log('Response:', response.status, await response.text()); // Debugging log
+
+            if (!response.ok) {
+              const errorData = await response.json();
+              setError(errorData.message || 'Signup failed.');
+              return;
+            }
+
+            setError(null);
+            if (onSuccess) onSuccess();
+            router.push('/home'); // Redirect to home page
+          } catch (err) {
+            setError('An unexpected error occurred. Please try again.');
+          }
         }}
         validationSchema={validationSchema}
       >
@@ -75,8 +94,42 @@ export default function SignUpScreen({ onSuccess }: SignUpScreenProps) {
             color: '#555',
             marginBottom: 24,
         }}>
-            Sign in to your account to continue
+           Create an account to continue
         </Text>
+        <View style={{ marginBottom: 16, alignItems: 'center' }}>
+          <View style={{ flexDirection: 'row', gap: 16 }}>
+            <Pressable
+              onPress={() => setRole('Tutor')}
+              style={{
+                backgroundColor: role === 'Tutor' ? '#000080' : '#fff',
+                borderColor: '#000080',
+                borderWidth: 1,
+                borderRadius: 8,
+                paddingVertical: 10,
+                paddingHorizontal: 24,
+                marginRight: 8,
+              }}
+            >
+              <Text style={{ color: role === 'Tutor' ? '#fff' : '#000080', fontWeight: 'bold' }}>Tutor</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => setRole('Student')}
+              style={{
+                backgroundColor: role === 'Student' ? '#000080' : '#fff',
+                borderColor: '#000080',
+                borderWidth: 1,
+                borderRadius: 8,
+                paddingVertical: 10,
+                paddingHorizontal: 24,
+              }}
+            >
+              <Text style={{ color: role === 'Student' ? '#fff' : '#000080', fontWeight: 'bold' }}>Student</Text>
+            </Pressable>
+          </View>
+          {roleError && (
+            <Text style={{ color: 'red', marginTop: 6 }}>{roleError}</Text>
+          )}
+        </View>
         <AuthInput
           value={values.email}
           onChangeText={handleChange('email')}
@@ -94,19 +147,17 @@ export default function SignUpScreen({ onSuccess }: SignUpScreenProps) {
           onChangeText={handleChange('password')}
           placeholder="password"
           label="Password"
-          onBlur = {handleBlur ("password")}
+          onBlur={handleBlur('password')}
           keyboardType="default"
           secureTextEntry={true}
         />
-        {/* Error */}
-        {touched.password && errors.password && <Text style={{ color: 'red' }}>{errors.password}</Text>}
 
         <AuthInput
           value={values.confirmpassword}
           onChangeText={handleChange('confirmpassword')}
           placeholder="Confirm Password"
           label="Confirm Password"
-          onBlur = {handleBlur ("confirmpassword")}
+          onBlur={handleBlur('confirmpassword')}
           keyboardType="default"
           secureTextEntry={true}
         />
@@ -142,8 +193,7 @@ export default function SignUpScreen({ onSuccess }: SignUpScreenProps) {
   )
 
 }
-  
-  
 
-  
-  
+
+
+
