@@ -2,6 +2,7 @@
   "name": "Tutoria",
   "main": "expo-router/entry",
   "version": "1.0.0",
+  "type": "module",
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
@@ -40,6 +41,7 @@
     "expo-web-browser": "~15.0.10",
     "express": "^5.2.1",
     "formik": "^2.4.9",
+    "js": "^0.1.0",
     "nodemon": "^3.1.11",
     "pg": "^8.17.2",
     "prisma": "^6.19.2",

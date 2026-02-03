@@ -1,0 +1,184 @@
+generator client {
+  provider      = "prisma-client-js"
+  output        = "../generated/prisma"
+  engineType    = "library"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           Int       @id @default(autoincrement())
+  email        String    @unique
+  passwordHash String
+  role         String
+  isVerified   Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Tutor {
+  id                   String   @id
+  userId               String
+  fullName             String
+  email                String   @unique
+  dateOfBirth          DateTime
+  gender               String
+  educationLevel       String
+  highestQualification String
+  yearsOfExperience    Int      @default(0)
+  subjects             Json?
+  bio                  String?
+  profilePicture       String?
+  contactNumber        String?
+  address              String?
+  availability         Json?
+  ratings              Float?
+  totalSessions        Int      @default(0)
+  badges               Json?
+  lastActiveDate       DateTime?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+model Student {
+  id                     String   @id
+  userId                 String
+  fullName               String
+  email                  String   @unique
+  dateOfBirth            DateTime
+  gender                 String
+  educationLevel         String
+  currentSchool          String?
+  enrollmentDate         DateTime?
+  profilePicture         String?
+  bio                    String?
+  totalCoursesEnrolled   Int      @default(0)
+  totalCoursesCompleted  Int      @default(0)
+  progress               Json?
+  badges                 Json?
+  lastActiveDate         DateTime?
+  contactNumber          String?
+  address                String?
+  parentGuardianContact  String?
+  interests              Json?
+  preferredLearningStyle String?
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+}
+
+model Subject {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  iconUrl     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  sessions    Session[]
+}
+
+model Session {
+  id             String   @id @default(uuid())
+  tutorId        String
+  studentId      String
+  subjectId      String
+  scheduledAt    DateTime
+  duration       Int
+  status         SessionStatus
+  notes          String?
+  meetingLink    String?
+  feedback       String?
+  isPaid         Boolean  @default(false)
+  price          Float?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  subject        Subject  @relation(fields: [subjectId], references: [id])
+  reviews        Review[]
+  messages       Message[]
+}
+
+enum SessionStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+  RESCHEDULED
+}
+
+model Message {
+  id           String   @id @default(uuid())
+  senderId     String
+  receiverId   String
+  content      String
+  sentAt       DateTime @default(now())
+  read         Boolean  @default(false)
+  sessionId    String?
+  session      Session? @relation(fields: [sessionId], references: [id])
+  attachmentUrl String?
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  type      NotificationType
+  message   String
+  isRead    Boolean  @default(false)
+  link      String?
+  createdAt DateTime @default(now())
+  meta      Json?
+}
+
+enum NotificationType {
+  SESSION
+  SYSTEM
+  SUPPORT
+  REMINDER
+  PROMOTION
+}
+
+model Review {
+  id         String   @id @default(uuid())
+  sessionId  String
+  reviewerId String
+  rating     Int
+  comment    String?
+  createdAt  DateTime @default(now())
+
+  session    Session  @relation(fields: [sessionId], references: [id])
+}
+
+model OnboardingProgress {
+  id          String   @id @default(uuid())
+  userId      String
+  step        String
+  completedAt DateTime
+  meta        Json?
+}
+
+model SupportTicket {
+  id          String   @id @default(uuid())
+  userId      String
+  subject     String
+  description String
+  status      SupportTicketStatus
+  priority    SupportTicketPriority @default(MEDIUM)
+  response    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum SupportTicketStatus {
+  OPEN
+  PENDING
+  CLOSED
+  RESOLVED
+}
+
+enum SupportTicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
